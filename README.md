@@ -37,7 +37,7 @@
 
 1. **Клонируйте репозиторий или скачайте файлы:**
    ```bash
-   git clone https://github.com/dmbingo/spo.git
+   git clone https://github.com/nsuemdm-lab/20x.git
    cd lms-framework
    ```
 
