@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.title }} — LMS</title>
+    <!-- Подключаем Bootstrap для красоты -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .progress { height: 25px; border-radius: 12px; }
+        .lesson-card { transition: 0.3s; }
+        .lesson-card:hover { background-color: #f8f9fa; }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            
+            <!-- Кнопка назад -->
+            <a href="/" class="btn btn-outline-secondary btn-sm mb-4">← Ко всем курсам</a>
+
+            <div class="card shadow-sm p-4">
+                <h1 class="mb-4">{{ course.title }}</h1>
+
+                {% if not is_bought %}
+                    <!-- Состояние: Курс не куплен -->
+                    <div class="text-center py-5">
+                        <div class="alert alert-info">
+                            Этот курс заблокирован. Купите его, чтобы открыть доступ к урокам.
+                        </div>
+                        <a href="{{ url_for('buy_course', course_id=course.id) }}" class="btn btn-success btn-lg">
+                            Купить курс (0 руб.)
+                        </a>
+                    </div>
+                {% else %}
+                    <!-- Состояние: Курс куплен -->
+                    
+                    <!-- ФИШКА: Прогресс-бар -->
+                    <div class="mb-5">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">Ваш прогресс</h5>
+                            <span class="badge bg-primary">{{ progress }}%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                 role="progressbar" 
+                                 style="width: {{ progress }}%" 
+                                 aria-valuenow="{{ progress }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Список уроков -->
+                    <h3 class="h5 mb-3">Уроки курса:</h3>
+                    <div class="list-group">
+                        {% for lesson in course.lessons %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center lesson-card">
+                                <div>
+                                    <span class="text-muted me-2">{{ loop.index }}.</span>
+                                    <!-- Ссылка на урок -->
+                                    <a href="{{ url_for('lesson_view', lesson_id=lesson.id) }}" class="text-decoration-none fw-bold">
+                                        {{ lesson.title }}
+                                    </a>
+                                </div>
+
+                                <div>
+                                    {% if lesson.id in completed_ids %}
+                                        <!-- Если урок пройден -->
+                                        <span class="badge bg-success rounded-pill px-3 py-2">Пройдено ✅</span>
+                                    {% else %}
+                                        <!-- Кнопка "Завершить" -->
+                                        <a href="{{ url_for('complete_lesson', lesson_id=lesson.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            Отметить как пройденный
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center mt-5 text-muted">
+    <small>Простейшая LMS на Python/Flask</small>
+</footer>
+
+</body>
+</html>
