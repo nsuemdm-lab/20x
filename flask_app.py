@@ -43,15 +43,21 @@ class Progress(db.Model):
     lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id'), nullable=False)
 
 # --- ИНИЦИАЛИЗАЦИЯ (Универсальная) ---
-@app.before_first_request
-def setup_db():
+with app.app_context():
     db.create_all()
+    # Проверяем, есть ли уже данные, чтобы не дублировать их
     if not Course.query.first():
-        demo_course = Course(title="Основы разработки на Python")
-        db.session.add(demo_course)
+        test_course = Course(title="Python для начинающих")
+        db.session.add(test_course)
         db.session.commit()
-        db.session.add(Lesson(course_id=demo_course.id, title="Урок 1: Введение", content="Добро пожаловать в LMS!"))
-        db.session.add(User(username="student_1"))
+
+        l1 = Lesson(course_id=test_course.id, title="Основы Python", content="Это контент первого урока.")
+        l2 = Lesson(course_id=test_course.id, title="Циклы и условия", content="Это контент второго урока.")
+        db.session.add_all([l1, l2])
+
+        if not User.query.filter_by(username="student").first():
+            db.session.add(User(username="student"))
+
         db.session.commit()
 
 # --- РОУТЫ (Универсальные) ---
@@ -60,7 +66,7 @@ def index():
     if 'user_id' not in session:
         user = User.query.first()
         if user: session['user_id'] = user.id
-    
+
     courses = Course.query.all()
     bought_ids = []
     if session.get('user_id'):
@@ -72,7 +78,7 @@ def course_detail(course_id):
     course = Course.query.get_or_404(course_id)
     u_id = session.get('user_id')
     is_bought = Enrollment.query.filter_by(user_id=u_id, course_id=course_id).first() is not None
-    
+
     prog = 0
     comp_ids = []
     if is_bought:
@@ -80,7 +86,7 @@ def course_detail(course_id):
         comp_ids = [p.lesson_id for p in comp_lessons]
         if course.lessons:
             prog = int((len(comp_ids) / len(course.lessons)) * 100)
-            
+
     return render_template('course.html', course=course, is_bought=is_bought, progress=prog, completed_ids=comp_ids)
 
 @app.route('/buy/<int:course_id>')
