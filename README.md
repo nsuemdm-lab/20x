@@ -7,7 +7,7 @@
 1. **Создание проекта:**
    - Зайдите в консоль Bash и склонируйте репозиторий:
      ```bash
-     git clone https://github.com/dmbingo/spo.git mysite
+     git clone https://github.com/nsuemdm-lab/20x.git mysite
      ```
    - Установите зависимости:
      ```bash
